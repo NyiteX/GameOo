@@ -1,16 +1,31 @@
-da did É dmg
-alo HP left: alo did É dmg
-da HP left: ³
+Warrior did 374.299988 dmg
+Hunter HP left: 625.700012
 
-da did É dmg
-alo HP left: §
+Hunter used AimedShot(150.399994dmg).
+Warrior HP left: 849.599976Hunter did 125.599998 dmg
+Warrior HP left: 724.000000
 
-alo did É dmg
-da HP left: º
+Warrior used Disarm for 5 seconds.
+Hunter did 40.000000 dmg
+Warrior HP left: 684.000000
 
-da did É dmg
-alo HP left: 0
-da won.
+Hunter did 40.000000 dmg
+Warrior HP left: 644.000000
 
-®
+Warrior did 374.299988 dmg
+Hunter HP left: 251.400024
+
+Hunter did 40.000000 dmg
+Warrior HP left: 604.000000
+
+Hunter did 40.000000 dmg
+Warrior HP left: 564.000000
+
+Hunter did 40.000000 dmg
+Warrior HP left: 524.000000
+
+Disarm ended.
+Warrior did 374.299988 dmg
+Hunter HP left: 0
+Warrior won.
 
