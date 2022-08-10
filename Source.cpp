@@ -7,7 +7,6 @@
 #include <vector>
 #include <string>
 #include <mutex>
-
 using namespace std;
 
 static bool KEEP_GOING = true;
@@ -194,9 +193,12 @@ public:
 			if (B.getHP() > 0)
 			{
 				A.setDmg(tmpdmg);
-				cout << B.getHP();
+				cout << B.getHP() << endl;
 				if (LOG == true)
+				{
 					str += to_string(B.getHP());
+					str += '\n';
+				}
 				this_thread::sleep_for(chrono::milliseconds(int(rand() % 3000 + 5000)));
 			}
 			else
@@ -607,36 +609,22 @@ public:
 		Weapon Staff_1("Crystalheart Pulse-Staff");
 		Weapon Staff_2("Apostle of Argus");
 		Weapon Staff_3("Golden Staff of the Sin'dorei");
-		Staff_1.setDmg_Weapon(466);
+		Staff_1.setDmg_Weapon(566);
 		Staff_1.setSpeed_Weapon(3);
-		Staff_2.setDmg_Weapon(399);
+		Staff_2.setDmg_Weapon(499);
 		Staff_2.setSpeed_Weapon(2.5);
-		Staff_3.setDmg_Weapon(525.5);
+		Staff_3.setDmg_Weapon(625.5);
 		Staff_3.setSpeed_Weapon(3.5);
 		MageWeapon.push_back(Staff_1);
 		MageWeapon.push_back(Staff_2);
 		MageWeapon.push_back(Staff_3);
 	}
-	void PrintDataHunterWeapon()const
+	void PrintDataWeapon(const vector<Weapon>&tmp)const
 	{
-		for (int i = 0; i < HunterWeapon.size(); i++)
+		for (int i = 0; i < tmp.size(); i++)
 		{
-			cout << i + 1 << ": " << HunterWeapon[i] << endl;
+			cout << i + 1 << ": " << tmp[i] << endl;
 
-		}
-	}
-	void PrintDataWarriorWeapon()const
-	{
-		for (int i = 0; i < WarriorWeapon.size(); i++)
-		{
-			cout << i + 1 << ": " << WarriorWeapon[i] << endl;
-		}
-	}
-	void PrintDataMageWeapon()const
-	{
-		for (int i = 0; i < MageWeapon.size(); i++)
-		{
-			cout << i + 1 << ": " << MageWeapon[i] << endl;
 		}
 	}
 	template<class T>
@@ -662,7 +650,7 @@ public:
 		{
 			system("cls");
 			cout << "\t~~~~~~~~~~~~ " << getName() << " ~~~~~~~~~~~~\t\n";
-			cout << "1. Start.\n2. Settings.\n~~~~~~~~~~~~~~~~\n\n";
+			cout << "1. Start.\n2. Settings.\nESC. Exit.\n~~~~~~~~~~~~~~~~\n\n";
 			vvod = _getch();
 			switch (vvod)
 			{
@@ -674,7 +662,7 @@ public:
 					system("cls");
 					cout << "\t~~~~~~~~~~~~ " << getName() << " ~~~~~~~~~~~~\t\n";
 					cout << "Choose ur class.\n";
-					cout << "1. Warrior.\n2. Hunter.\n3. Mage.\n~~~~~~~~~~~~~~~~\n\n";
+					cout << "1. Warrior.\n2. Hunter.\n3. Mage.\nESC. Exit.\n~~~~~~~~~~~~~~~~\n\n";
 					vvod2 = _getch();
 					switch (vvod2)
 					{
@@ -684,7 +672,7 @@ public:
 						W1.CreateCharacter();
 						system("cls");
 						cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-						PrintDataWarriorWeapon();
+						PrintDataWeapon(WarriorWeapon);
 						CreateCharacterWithEnemy(W1, WarriorWeapon);
 						system("cls");
 						cout << "Who will fight against " << W1.getName() << endl;
@@ -698,7 +686,7 @@ public:
 							W2.CreateCharacter();
 							system("cls");
 							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-							PrintDataWarriorWeapon();
+							PrintDataWeapon(WarriorWeapon);
 							CreateCharacterWithEnemy(W2, WarriorWeapon);
 							system("cls");
 							cout << W1 << endl;
@@ -713,7 +701,7 @@ public:
 							H2.CreateCharacter();
 							system("cls");
 							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-							PrintDataHunterWeapon();
+							PrintDataWeapon(HunterWeapon);
 							CreateCharacterWithEnemy(H2, HunterWeapon);
 							system("cls");
 							cout << W1 << endl;
@@ -728,7 +716,7 @@ public:
 							M2.CreateCharacter();
 							system("cls");
 							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-							PrintDataMageWeapon();
+							PrintDataWeapon(MageWeapon);
 							CreateCharacterWithEnemy(M2, MageWeapon);
 							system("cls");
 							cout << W1 << endl;
@@ -750,11 +738,11 @@ public:
 						H1.CreateCharacter();
 						system("cls");
 						cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-						PrintDataHunterWeapon();
+						PrintDataWeapon(HunterWeapon);
 						CreateCharacterWithEnemy(H1, HunterWeapon);
 						system("cls");
 						cout << "Who will fight against " << H1.getName() << endl;
-						cout << "1. Warrior.\n2. Hunter.\n3. Mage\n~~~~~~~~~~~~~~~~\n\n";
+						cout << "1. Warrior.\n2. Hunter.\n3. Mage\nESC. Exit.\n~~~~~~~~~~~~~~~~\n\n";
 						char vvod3 = _getch();
 						switch (vvod3)
 						{
@@ -764,7 +752,7 @@ public:
 							W2.CreateCharacter();
 							system("cls");
 							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-							PrintDataWarriorWeapon();
+							PrintDataWeapon(WarriorWeapon);
 							CreateCharacterWithEnemy(W2, WarriorWeapon);
 							system("cls");
 							cout << H1 << endl;
@@ -779,7 +767,7 @@ public:
 							H2.CreateCharacter();
 							system("cls");
 							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-							PrintDataHunterWeapon();
+							PrintDataWeapon(HunterWeapon);
 							CreateCharacterWithEnemy(H2, HunterWeapon);
 							system("cls");
 							cout << H1 << endl;
@@ -794,7 +782,7 @@ public:
 							M2.CreateCharacter();
 							system("cls");
 							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-							PrintDataMageWeapon();
+							PrintDataWeapon(MageWeapon);
 							CreateCharacterWithEnemy(M2, MageWeapon);
 							system("cls");
 							cout << H1 << endl;
@@ -816,11 +804,11 @@ public:
 						M1.CreateCharacter();
 						system("cls");
 						cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-						PrintDataMageWeapon();
+						PrintDataWeapon(MageWeapon);
 						CreateCharacterWithEnemy(M1, MageWeapon);
 						system("cls");
 						cout << "Who will fight against " << M1.getName() << endl;
-						cout << "1. Warrior.\n2. Hunter.\n3. Mage\n~~~~~~~~~~~~~~~~\n\n";
+						cout << "1. Warrior.\n2. Hunter.\n3. Mage\nESC. Exit.\n~~~~~~~~~~~~~~~~\n\n";
 						char vvod3 = _getch();
 						switch (vvod3)
 						{
@@ -830,7 +818,7 @@ public:
 							W2.CreateCharacter();
 							system("cls");
 							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-							PrintDataWarriorWeapon();
+							PrintDataWeapon(WarriorWeapon);
 							CreateCharacterWithEnemy(W2, WarriorWeapon);
 							system("cls");
 							cout << M1 << endl;
@@ -845,7 +833,7 @@ public:
 							H2.CreateCharacter();
 							system("cls");
 							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-							PrintDataHunterWeapon();
+							PrintDataWeapon(HunterWeapon);
 							CreateCharacterWithEnemy(H2, HunterWeapon);
 							system("cls");
 							cout << M1 << endl;
@@ -860,7 +848,7 @@ public:
 							M2.CreateCharacter();
 							system("cls");
 							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
-							PrintDataMageWeapon();
+							PrintDataWeapon(MageWeapon);
 							CreateCharacterWithEnemy(M2, MageWeapon);
 							system("cls");
 							cout << M1 << endl;
@@ -894,7 +882,7 @@ public:
 						cout << "(is active.)\n";
 					else
 						cout << "(isn't active.)\n";
-					cout << "1. ON.\n2. OFF.\n~~~~~~~~~~~~~~~~\n\n";
+					cout << "1. ON.\n2. OFF.\nESC. Exit.\n~~~~~~~~~~~~~~~~\n\n";
 					vvod2 = _getch();
 					switch (vvod2)
 					{
@@ -930,6 +918,7 @@ public:
 	{
 		HunterWeapon.clear();
 		WarriorWeapon.clear();
+		MageWeapon.clear();
 	}
 };
 
