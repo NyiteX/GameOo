@@ -138,7 +138,6 @@ public:
 			armor = stof(str);
 		}
 	}
-
 };
 class Weapon
 {
@@ -198,7 +197,7 @@ public:
 				cout << B.getHP();
 				if (LOG == true)
 					str += to_string(B.getHP());
-				this_thread::sleep_for(chrono::milliseconds(8000));
+				this_thread::sleep_for(chrono::milliseconds(int(rand() % 3000 + 5000)));
 			}
 			else
 			{
@@ -220,7 +219,6 @@ public:
 			}
 		}
 	}
-
 };
 class Warrior :virtual public Human
 {
@@ -262,7 +260,7 @@ public:
 			}
 			if(B.getHP() > 0 && A.getHP() > 0)
 			{
-				this_thread::sleep_for(chrono::milliseconds(15000));
+				this_thread::sleep_for(chrono::milliseconds(int(rand()%4000+7000)));
 			}
 		}
 	}
@@ -321,20 +319,88 @@ public:
 					str += to_string(B.getHP());
 					str += '\n';
 				}
-				this_thread::sleep_for(chrono::milliseconds(2000));
+				this_thread::sleep_for(chrono::milliseconds(int(rand() % 1000 + 3000)));
 			}
 			if (B.getHP() <= 0)
 			{
-				KEEP_GOING = false;
+				if (KEEP_GOING == true)
+				{
+					KEEP_GOING = false;
+					m.lock();
+					cout << "0\n\n" << A.getName() << " won.\n\n";
+					m.unlock();
+					if (LOG == true)
+					{
+						str += "0\n";
+						str += A.getName();
+						str += " won.\n\n";
+					}
+				}
+				else
+					break;
+			}
+		}
+	}
+	void Fireblast(Human& A, Human& B, string& str)
+	{
+		while (KEEP_GOING == true)
+		{
+			float flk = A.getDmg() - (A.getDmg() * 0.2);
+			mutex m;			
+			if (B.getHP() > 0 && A.getHP() > 0)
+			{
 				m.lock();
-				cout << "0\n\n" << A.getName() << " won.\n\n";
+				cout << A.getName();
+				cout << " used Fireblast(" << flk << "dmg).\n";
+				m.unlock();
+				B.setHP(B.getHP() - flk);
+				if (LOG == true)
+				{
+					str += A.getName();
+					str += " is casting Fireblast...\n\n";
+					str += A.getName();
+					str += " used Firebal(";
+					str += to_string(flk);
+					str += "dmg).\n";
+				}
+				if (LOG == true)
+				{
+					str += B.getName();
+					str += " HP left: ";
+				}
+				m.lock();
+				cout << B.getName() << " HP left: ";
+				m.unlock();
+			}
+
+			if (B.getHP() > 0 && A.getHP() > 0)
+			{
+				m.lock();
+				cout << B.getHP() << endl;
 				m.unlock();
 				if (LOG == true)
 				{
-					str += "0\n";
-					str += A.getName();
-					str += " won.\n\n";
+					str += to_string(B.getHP());
+					str += '\n';
 				}
+				this_thread::sleep_for(chrono::milliseconds(int(rand()%3000+6000)));
+			}
+			if (B.getHP() <= 0)
+			{
+				if (KEEP_GOING == true)
+				{
+					KEEP_GOING = false;
+					m.lock();
+					cout << "0\n\n" << A.getName() << " won.\n\n";
+					m.unlock();
+					if (LOG == true)
+					{
+						str += "0\n";
+						str += A.getName();
+						str += " won.\n\n";
+					}
+				}
+				else
 				break;
 			}
 		}
@@ -394,9 +460,11 @@ public:
 			thread t1(&Human::Strike, W1, ref(W1), ref(H1), ref(LOG_game));					
 			if (typeid(T2).name() == typeid(Warrior).name())
 			{
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t3(&Warrior::Disarm, Ktmp, ref(H1), ref(W1), ref(LOG_game));
-				this_thread::sleep_for(chrono::milliseconds(5));
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t2(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t5(&Warrior::Disarm, Ktmp, ref(W1), ref(H1), ref(LOG_game));
 				t1.join();
 				t2.join();
@@ -406,8 +474,9 @@ public:
 			if (typeid(T2).name() == typeid(Hunter).name())
 			{
 				thread t3(&Warrior::Disarm, Ktmp, ref(H1), ref(W1), ref(LOG_game));
-				this_thread::sleep_for(chrono::milliseconds(5));
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t4(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t6(&Hunter::AimedShot, Htmp, ref(H1), ref(W1), ref(LOG_game));
 				t1.join();
 				t3.join();
@@ -416,22 +485,25 @@ public:
 			}
 			if (typeid(T2).name() == typeid(Mage).name())
 			{
-				this_thread::sleep_for(chrono::milliseconds(15));
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t6(&Mage::Fireball, Mtmp, ref(H1), ref(W1), ref(LOG_game));
+				this_thread::sleep_for(chrono::milliseconds(10));
+				thread t9(&Mage::Fireblast, Mtmp, ref(H1), ref(W1), ref(LOG_game));
 				t1.join();
 				t6.join();
+				t9.join();
 			}
 		}
 		if (typeid(T1).name() == typeid(Hunter).name())
 		{
 			thread t1(&Human::Strike, W1, ref(W1), ref(H1), ref(LOG_game));
-			this_thread::sleep_for(chrono::milliseconds(5));
+			this_thread::sleep_for(chrono::milliseconds(10));
 			thread t4(&Hunter::AimedShot, Htmp, ref(W1), ref(H1), ref(LOG_game));
 			if (typeid(T2).name() == typeid(Warrior).name())
 			{
-				this_thread::sleep_for(chrono::milliseconds(5));
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t2(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
-				this_thread::sleep_for(chrono::milliseconds(5));
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t7(&Warrior::Disarm, Ktmp, ref(W1), ref(H1), ref(LOG_game));
 				t1.join();
 				t2.join();
@@ -440,9 +512,9 @@ public:
 			}
 			if (typeid(T2).name() == typeid(Hunter).name())
 			{
-				this_thread::sleep_for(chrono::milliseconds(5));
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t2(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
-				this_thread::sleep_for(chrono::milliseconds(5));
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t8(&Hunter::AimedShot, Htmp, ref(H1), ref(W1), ref(LOG_game));
 				t1.join();
 				t2.join();
@@ -451,8 +523,11 @@ public:
 			}
 			if (typeid(T2).name() == typeid(Mage).name())
 			{
-				this_thread::sleep_for(chrono::milliseconds(15));
+				this_thread::sleep_for(chrono::milliseconds(10));
 				thread t6(&Mage::Fireball, Mtmp, ref(H1), ref(W1), ref(LOG_game));
+				this_thread::sleep_for(chrono::milliseconds(10));
+				thread t9(&Mage::Fireblast, Mtmp, ref(H1), ref(W1), ref(LOG_game));
+				t9.join();
 				t1.join();
 				t4.join();
 				t6.join();
@@ -461,27 +536,35 @@ public:
 		if (typeid(T1).name() == typeid(Mage).name())
 		{
 			thread t1(&Mage::Fireball, Mtmp, ref(W1), ref(H1), ref(LOG_game));
+			this_thread::sleep_for(chrono::milliseconds(15));
+			thread t9(&Mage::Fireblast, Mtmp, ref(W1), ref(H1), ref(LOG_game));
 			if (typeid(T2).name() == typeid(Warrior).name())
 			{
-				this_thread::sleep_for(chrono::milliseconds(5));
+				this_thread::sleep_for(chrono::milliseconds(15));
 				thread t2(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
+				t9.join();
 				t1.join();
 				t2.join();
 			}
 			if (typeid(T2).name() == typeid(Hunter).name())
 			{
-				this_thread::sleep_for(chrono::milliseconds(5));
+				this_thread::sleep_for(chrono::milliseconds(15));
 				thread t2(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
-				this_thread::sleep_for(chrono::milliseconds(5));
+				this_thread::sleep_for(chrono::milliseconds(15));
 				thread t8(&Hunter::AimedShot, Htmp, ref(H1), ref(W1), ref(LOG_game));
+				t9.join();
 				t1.join();
 				t2.join();
 				t8.join();
 			}
 			if (typeid(T2).name() == typeid(Mage).name())
 			{
-				this_thread::sleep_for(chrono::milliseconds(5));
+				this_thread::sleep_for(chrono::milliseconds(15));
 				thread t6(&Mage::Fireball, Mtmp, ref(H1), ref(W1), ref(LOG_game));
+				this_thread::sleep_for(chrono::milliseconds(15));
+				thread t0(&Mage::Fireblast, Mtmp, ref(H1), ref(W1), ref(LOG_game));
+				t0.join();
+				t9.join();
 				t1.join();
 				t6.join();
 			}
@@ -867,6 +950,7 @@ ostream& operator << (ostream& os, const Human& w)
 
 int main()
 {
+	srand(time(0));
 	Game G("Heroes of ITStep");
 	G.Menu();
 }
