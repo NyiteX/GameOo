@@ -1,31 +1,34 @@
-Warrior did 374.299988 dmg
-Hunter HP left: 625.700012
+Hunter did 216.899994 dmg
+Mage HP left: 1783.099976
 
-Hunter used AimedShot(150.399994dmg).
-Warrior HP left: 849.599976Hunter did 125.599998 dmg
-Warrior HP left: 724.000000
+Hunter used AimedShot(324.899994dmg).
+Mage HP left: 1458.199951
+Hunter did 216.899994 dmg
+Mage HP left: 1241.299927
 
-Warrior used Disarm for 5 seconds.
-Hunter did 40.000000 dmg
-Warrior HP left: 684.000000
+Mage is casting Fireball...
 
-Hunter did 40.000000 dmg
-Warrior HP left: 644.000000
+Mage used Firebal(525.000000dmg).
+Hunter HP left: 2475.000000
+Hunter did 216.899994 dmg
+Mage HP left: 1024.399902
 
-Warrior did 374.299988 dmg
-Hunter HP left: 251.400024
+Hunter did 216.899994 dmg
+Mage HP left: 807.499878
 
-Hunter did 40.000000 dmg
-Warrior HP left: 604.000000
+Hunter did 216.899994 dmg
+Mage HP left: 590.599854
 
-Hunter did 40.000000 dmg
-Warrior HP left: 564.000000
+Hunter used AimedShot(324.899994dmg).
+Mage HP left: 265.699860
+Mage is casting Fireball...
 
-Hunter did 40.000000 dmg
-Warrior HP left: 524.000000
+Mage used Firebal(525.000000dmg).
+Hunter HP left: 1950.000000
+Hunter did 216.899994 dmg
+Mage HP left: 48.799866
 
-Disarm ended.
-Warrior did 374.299988 dmg
-Hunter HP left: 0
-Warrior won.
+Hunter did 216.899994 dmg
+Mage HP left: 0
+Hunter won.
 

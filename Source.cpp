@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <vector>
 #include <string>
+#include <mutex>
 
 using namespace std;
 
@@ -53,12 +54,15 @@ public:
 	void setArmor(const unsigned short& n) { this->armor = n; }
 	void setNoWeap_Speed(const float& n) { this->noweapspeed = n; }
 	void setAttcSpeed(const float& n) { this->attcspeed = n; }
-	void Strike(const Human &A, Human &B,string &str)
+	void Strike(const Human& A, Human& B, string& str)
 	{
+		mutex s;
 		while (KEEP_GOING == true)
 		{
 			float n = (A.getDmg() - (A.getDmg() / 100) * (B.getArmor() / 1000));
+			s.lock();
 			cout << A.getName() << " did " << n << " dmg\n";
+			s.unlock();
 			if (LOG == true)
 			{
 				str += A.getName();
@@ -67,7 +71,9 @@ public:
 				str += " dmg\n";
 			}
 			B.setHP(B.getHP() - n);
+			s.lock();
 			cout << B.getName() << " HP left: ";
+			s.unlock();
 			if (LOG == true)
 			{
 				str += B.getName();
@@ -75,7 +81,9 @@ public:
 			}
 			if (B.getHP() > 0)
 			{
+				s.lock();
 				cout << B.getHP() << "\n\n";
+				s.unlock();
 				if (LOG == true)
 				{
 					str += to_string(B.getHP());
@@ -84,18 +92,20 @@ public:
 				this_thread::sleep_for(chrono::milliseconds((int)A.getAttcSpeed() * 1000));
 			}
 			else
-			{			
-				cout << "0\n\n"<<A.getName()<<" won.\n\n";
+			{
+				KEEP_GOING = false;
+				s.lock();
+				cout << "0\n\n" << A.getName() << " won.\n\n";
+				s.unlock();
 				B.setHP(0);
 				if (LOG == true)
 				{
 					str += "0\n";
 					str += A.getName();
 					str += " won.\n\n";
-				}
-				KEEP_GOING = false;
+				}				
 				break;
-			}			
+			}
 		}
 	}
 	void CreateCharacter()
@@ -103,7 +113,7 @@ public:
 		cout << "Enter character name: ";
 		cin >> name;
 		string str = "a";
-		while (Proverka(str)==0 || stof(str) < 1 || stof(str) > 20000)
+		while (Proverka(str) == 0 || stof(str) < 1 || stof(str) > 20000)
 		{
 			cout << "Health(1-20000): ";
 			cin >> str;
@@ -111,15 +121,22 @@ public:
 				cout << "Wrong numner.\n";
 		}
 		setHPMAX(stof(str));
-		str = "a";
-		while (Proverka(str) == 0 || stof(str) < 0 || stof(str) > 70000)
+		cout << "Wanna change default(" << armor << ") armor value ?\n";
+		char vv;
+		cout << "1. Yes.\n2. No.\n";
+		vv=_getch();
+		if (vv == '1')
 		{
-			cout << "Armor(1-70000): ";
-			cin >> str;
-			if (stof(str) < 1 || stof(str) > 70000)
-				cout << "Wrong numner.\n";
+			str = "a";
+			while (Proverka(str) == 0 || stof(str) < 0 || stof(str) > 70000)
+			{
+				cout << "Armor(1-70000): ";
+				cin >> str;
+				if (stof(str) < 1 || stof(str) > 70000)
+					cout << "Wrong numner.\n";
+			}
+			armor = stof(str);
 		}
-		armor = stof(str);
 	}
 
 };
@@ -141,7 +158,7 @@ public:
 	void setSpeed_Weapon(const float& n) { this->weapspeed = n; }
 };
 
-class Hunter:virtual public Human 
+class Hunter :virtual public Human
 {
 public:
 	Hunter()
@@ -152,13 +169,16 @@ public:
 	}
 	void AimedShot(Human& A, Human& B, string& str) //1.Hunter used aimshot 2.victim
 	{
+		mutex s;
 		while (KEEP_GOING == true)
-		{			
+		{
 			float tmpdmg = A.getDmg();
-			A.setDmg(tmpdmg+((tmpdmg/100)*50));	
+			A.setDmg(tmpdmg + ((tmpdmg / 100) * 50));
 			float n = (A.getDmg() - (A.getDmg() / 100) * (B.getArmor() / 1000));
+			s.lock();
 			cout << A.getName();
-			cout << " used AimedShot("<<n<<"dmg).\n";
+			cout << " used AimedShot(" << n << "dmg).\n";
+			s.unlock();
 			B.setHP(B.getHP() - n);
 			if (LOG == true)
 			{
@@ -166,13 +186,12 @@ public:
 				str += " used AimedShot(";
 				str += to_string(n);
 				str += "dmg).\n";
-			}			
-			if (LOG == true)
-			{
 				str += B.getName();
 				str += " HP left: ";
 			}
+			s.lock();
 			cout << B.getName() << " HP left: ";
+			s.unlock();
 			if (B.getHP() > 0)
 			{
 				A.setDmg(tmpdmg);
@@ -183,18 +202,25 @@ public:
 			}
 			else
 			{
-				cout << "0\n\n" << A.getName() << " won.\n\n";
-				if (LOG == true)
+				if (KEEP_GOING == true)
 				{
-					str += "0\n";
-					str += A.getName();
-					str += " won.\n\n";
+					KEEP_GOING = false;
+					s.lock();
+					cout << "0\n\n" << A.getName() << " won.\n\n";
+					s.unlock();
+					if (LOG == true)
+					{
+						str += "0\n";
+						str += A.getName();
+						str += " won.\n\n";
+					}
 				}
-				KEEP_GOING = false;
+				else
 				break;
-			}		
+			}
 		}
 	}
+
 };
 class Warrior :virtual public Human
 {
@@ -205,30 +231,111 @@ public:
 		setNoWeap_Speed(1.5);
 		setArmor(40000);
 	}
-	void Disarm(Human& A,const Human& B, string& str) //1.victim 2.Warrior(who used Disarm)
+	void Disarm(Human& A, const Human& B, string& str) //1.victim 2.Warrior(who used Disarm)
 	{
+		mutex l;
 		while (KEEP_GOING == true)
 		{
 			float tmpdmg = A.getDmg();
 			float tmpspeed = A.getAttcSpeed();
 			A.setDmg(A.getBasicDmg());
 			A.setAttcSpeed(A.getNo_WeaponSpeed());
+			l.lock();
 			cout << B.getName();
 			cout << " used Disarm for 4 seconds.\n";
+			l.unlock();
 			if (LOG == true)
 			{
 				str += B.getName();
 				str += " used Disarm for 4 seconds.\n";
-			}		
-			if (B.getHP() > 0)
+			}
+			if (B.getHP() > 0 && A.getHP() > 0)
 			{
 				this_thread::sleep_for(chrono::milliseconds(4000));
 				A.setDmg(tmpdmg);
 				A.setAttcSpeed(tmpspeed);
+				l.lock();
 				cout << "Disarm ended.\n";
+				l.unlock();
 				if (LOG == true)
 					str += "Disarm ended.\n";
+			}
+			if(B.getHP() > 0 && A.getHP() > 0)
+			{
 				this_thread::sleep_for(chrono::milliseconds(15000));
+			}
+		}
+	}
+};
+class Mage :virtual public Human
+{
+public:
+	Mage()
+	{
+		setBasicDmg(10);
+		setNoWeap_Speed(1.5);
+		setArmor(10000);
+	}
+	void Fireball(Human& A, Human& B, string& str)
+	{
+		while (KEEP_GOING == true)
+		{
+			mutex m;
+			m.lock();
+			cout << A.getName() << " is casting Fireball...\n\n";
+			m.unlock();
+			this_thread::sleep_for(chrono::milliseconds(int(A.getAttcSpeed() * 1000)));			
+			if (B.getHP() > 0 && A.getHP() > 0)
+			{
+				m.lock();
+				cout << A.getName();
+				cout << " used Fireball(" << A.getDmg() << "dmg).\n";
+				m.unlock();
+				B.setHP(B.getHP() - A.getDmg());
+				if (LOG == true)
+				{
+					str += A.getName();
+					str += " is casting Fireball...\n\n";
+					str += A.getName();
+					str += " used Firebal(";
+					str += to_string(A.getDmg());
+					str += "dmg).\n";
+				}
+				if (LOG == true)
+				{
+					str += B.getName();
+					str += " HP left: ";
+				}
+				m.lock();
+				cout << B.getName() << " HP left: ";
+				m.unlock();
+			}
+			
+			if (B.getHP() > 0 && A.getHP() > 0)
+			{
+				m.lock();
+				cout << B.getHP() << endl;
+				m.unlock();
+				if (LOG == true)
+				{
+					str += to_string(B.getHP());
+					str += '\n';
+				}
+				this_thread::sleep_for(chrono::milliseconds(2000));
+			}
+			if (B.getHP() <= 0)
+			{
+				KEEP_GOING = false;
+				m.lock();
+				cout << "0\n\n" << A.getName() << " won.\n\n";
+				m.unlock();
+				if (LOG == true)
+				{
+					str += "0\n";
+					str += A.getName();
+					str += " won.\n\n";
+				}
+				break;
 			}
 		}
 	}
@@ -240,17 +347,20 @@ class Game
 	string LOG_game;
 	vector<Weapon>HunterWeapon;
 	vector<Weapon>WarriorWeapon;
+	vector<Weapon>MageWeapon;
 public:
-	Game() 
+	Game()
 	{
 		DataHunterWeapon();
 		DataWarriorWeapon();
+		DataMageWeapon();
 	};
-	Game(const string& n) 
-	{ 
+	Game(const string& n)
+	{
 		this->name = n;
 		DataHunterWeapon();
 		DataWarriorWeapon();
+		DataMageWeapon();
 	}
 	string getName()const { return name; }
 	void setName(const string& n) { this->name = n; }
@@ -264,68 +374,123 @@ public:
 			logtofile.close();
 		}
 		else
-			cout << "File isnt open.\n";		
+			cout << "File isnt open.\n";
 	}
 	template<class T1, class T2>
-	void Fight(T1 &W1, T2 &H1)
+	void Fight(T1& W1, T2& H1)
 	{
 		KEEP_GOING = true;
 		for (int i = 3; i > 0; i--)
 		{
-			cout << "Starting fight in "<<i<<"...\n";
+			cout << "Starting fight in " << i << "...\n";
 			this_thread::sleep_for(chrono::milliseconds(1000));
-		}		
-		cout <<"\tFIGHT!\n~~~~~~~~~~~~~~~~\n\n";
+		}
+		cout << "\tFIGHT!\n~~~~~~~~~~~~~~~~\n\n";
 		Warrior Ktmp;
 		Hunter Htmp;
-		thread t1(&Human::Strike, H1, ref(W1), ref(H1), ref(LOG_game));		
-		this_thread::sleep_for(chrono::milliseconds(5));
-		thread t2(&Human::Strike, W1, ref(H1), ref(W1), ref(LOG_game));
+		Mage Mtmp;
 		if (typeid(T1).name() == typeid(Warrior).name())
 		{
-			this_thread::sleep_for(chrono::milliseconds(5));
-			thread t3(&Warrior::Disarm, Ktmp, ref(H1), ref(W1), ref(LOG_game));
+			thread t1(&Human::Strike, W1, ref(W1), ref(H1), ref(LOG_game));					
 			if (typeid(T2).name() == typeid(Warrior).name())
 			{
+				thread t3(&Warrior::Disarm, Ktmp, ref(H1), ref(W1), ref(LOG_game));
 				this_thread::sleep_for(chrono::milliseconds(5));
+				thread t2(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
 				thread t5(&Warrior::Disarm, Ktmp, ref(W1), ref(H1), ref(LOG_game));
+				t1.join();
+				t2.join();
 				t3.join();
 				t5.join();
 			}
 			if (typeid(T2).name() == typeid(Hunter).name())
 			{
+				thread t3(&Warrior::Disarm, Ktmp, ref(H1), ref(W1), ref(LOG_game));
 				this_thread::sleep_for(chrono::milliseconds(5));
+				thread t4(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
 				thread t6(&Hunter::AimedShot, Htmp, ref(H1), ref(W1), ref(LOG_game));
+				t1.join();
 				t3.join();
+				t4.join();
+				t6.join();
+			}
+			if (typeid(T2).name() == typeid(Mage).name())
+			{
+				this_thread::sleep_for(chrono::milliseconds(15));
+				thread t6(&Mage::Fireball, Mtmp, ref(H1), ref(W1), ref(LOG_game));
+				t1.join();
 				t6.join();
 			}
 		}
 		if (typeid(T1).name() == typeid(Hunter).name())
 		{
+			thread t1(&Human::Strike, W1, ref(W1), ref(H1), ref(LOG_game));
 			this_thread::sleep_for(chrono::milliseconds(5));
 			thread t4(&Hunter::AimedShot, Htmp, ref(W1), ref(H1), ref(LOG_game));
 			if (typeid(T2).name() == typeid(Warrior).name())
 			{
 				this_thread::sleep_for(chrono::milliseconds(5));
+				thread t2(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
+				this_thread::sleep_for(chrono::milliseconds(5));
 				thread t7(&Warrior::Disarm, Ktmp, ref(W1), ref(H1), ref(LOG_game));
+				t1.join();
+				t2.join();
 				t4.join();
 				t7.join();
 			}
 			if (typeid(T2).name() == typeid(Hunter).name())
 			{
 				this_thread::sleep_for(chrono::milliseconds(5));
+				thread t2(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
+				this_thread::sleep_for(chrono::milliseconds(5));
 				thread t8(&Hunter::AimedShot, Htmp, ref(H1), ref(W1), ref(LOG_game));
+				t1.join();
+				t2.join();
 				t4.join();
 				t8.join();
-			}		
+			}
+			if (typeid(T2).name() == typeid(Mage).name())
+			{
+				this_thread::sleep_for(chrono::milliseconds(15));
+				thread t6(&Mage::Fireball, Mtmp, ref(H1), ref(W1), ref(LOG_game));
+				t1.join();
+				t4.join();
+				t6.join();
+			}
 		}
-		t1.join();
-		t2.join();
-		if(LOG==true)
-		LogtoFile(LOG_game);
+		if (typeid(T1).name() == typeid(Mage).name())
+		{
+			thread t1(&Mage::Fireball, Mtmp, ref(W1), ref(H1), ref(LOG_game));
+			if (typeid(T2).name() == typeid(Warrior).name())
+			{
+				this_thread::sleep_for(chrono::milliseconds(5));
+				thread t2(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
+				t1.join();
+				t2.join();
+			}
+			if (typeid(T2).name() == typeid(Hunter).name())
+			{
+				this_thread::sleep_for(chrono::milliseconds(5));
+				thread t2(&Human::Strike, H1, ref(H1), ref(W1), ref(LOG_game));
+				this_thread::sleep_for(chrono::milliseconds(5));
+				thread t8(&Hunter::AimedShot, Htmp, ref(H1), ref(W1), ref(LOG_game));
+				t1.join();
+				t2.join();
+				t8.join();
+			}
+			if (typeid(T2).name() == typeid(Mage).name())
+			{
+				this_thread::sleep_for(chrono::milliseconds(5));
+				thread t6(&Mage::Fireball, Mtmp, ref(H1), ref(W1), ref(LOG_game));
+				t1.join();
+				t6.join();
+			}
+		}
+		if (LOG == true)
+			LogtoFile(LOG_game);
 	}
 	void DataHunterWeapon()
-	{		
+	{
 		Weapon Bow_1("Wrathtide Longbow");
 		Weapon Bow_2("Sunfury Bow of the Phoenix");
 		Weapon Bow_3("Hurricane");
@@ -354,6 +519,21 @@ public:
 		WarriorWeapon.push_back(TwoHandedSword_1);
 		WarriorWeapon.push_back(TwoHandedSword_2);
 	}
+	void DataMageWeapon()
+	{
+		Weapon Staff_1("Crystalheart Pulse-Staff");
+		Weapon Staff_2("Apostle of Argus");
+		Weapon Staff_3("Golden Staff of the Sin'dorei");
+		Staff_1.setDmg_Weapon(466);
+		Staff_1.setSpeed_Weapon(3);
+		Staff_2.setDmg_Weapon(399);
+		Staff_2.setSpeed_Weapon(2.5);
+		Staff_3.setDmg_Weapon(525.5);
+		Staff_3.setSpeed_Weapon(3.5);
+		MageWeapon.push_back(Staff_1);
+		MageWeapon.push_back(Staff_2);
+		MageWeapon.push_back(Staff_3);
+	}
 	void PrintDataHunterWeapon()const
 	{
 		for (int i = 0; i < HunterWeapon.size(); i++)
@@ -369,8 +549,15 @@ public:
 			cout << i + 1 << ": " << WarriorWeapon[i] << endl;
 		}
 	}
+	void PrintDataMageWeapon()const
+	{
+		for (int i = 0; i < MageWeapon.size(); i++)
+		{
+			cout << i + 1 << ": " << MageWeapon[i] << endl;
+		}
+	}
 	template<class T>
-	void CreateCharacterWithEnemy(T&W1,const vector<Weapon>&tmpWeapon)
+	void CreateCharacterWithEnemy(T& W1, const vector<Weapon>& tmpWeapon)
 	{
 		string str = "a";
 		while (Proverka(str) == 0 || stof(str) < 1 || stof(str) > tmpWeapon.size())
@@ -404,7 +591,7 @@ public:
 					system("cls");
 					cout << "\t~~~~~~~~~~~~ " << getName() << " ~~~~~~~~~~~~\t\n";
 					cout << "Choose ur class.\n";
-					cout << "1. Warrior.\n2. Hunter.\n~~~~~~~~~~~~~~~~\n\n";
+					cout << "1. Warrior.\n2. Hunter.\n3. Mage.\n~~~~~~~~~~~~~~~~\n\n";
 					vvod2 = _getch();
 					switch (vvod2)
 					{
@@ -415,10 +602,10 @@ public:
 						system("cls");
 						cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
 						PrintDataWarriorWeapon();
-						CreateCharacterWithEnemy(W1, WarriorWeapon);					
-						system("cls");						
+						CreateCharacterWithEnemy(W1, WarriorWeapon);
+						system("cls");
 						cout << "Who will fight against " << W1.getName() << endl;
-						cout << "1. Warrior.\n2. Hunter.\n~~~~~~~~~~~~~~~~\n\n";
+						cout << "1. Warrior.\n2. Hunter.\n3. Mage\n~~~~~~~~~~~~~~~~\n\n";
 						char vvod3 = _getch();
 						switch (vvod3)
 						{
@@ -452,9 +639,24 @@ public:
 							Fight(W1, H2);
 							break;
 						}
+						case'3':
+						{
+							Mage M2;
+							M2.CreateCharacter();
+							system("cls");
+							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
+							PrintDataMageWeapon();
+							CreateCharacterWithEnemy(M2, MageWeapon);
+							system("cls");
+							cout << W1 << endl;
+							cout << "\tVS\n";
+							cout << M2 << "\n~~~~~~~~~~~~~~~~\n\n";
+							Fight(W1, M2);
+							break;
+						}
 						default:
 							break;
-						}						
+						}
 						system("pause");
 						vvod2 = 27;
 						break;
@@ -469,7 +671,7 @@ public:
 						CreateCharacterWithEnemy(H1, HunterWeapon);
 						system("cls");
 						cout << "Who will fight against " << H1.getName() << endl;
-						cout << "1. Warrior.\n2. Hunter.\n~~~~~~~~~~~~~~~~\n\n";
+						cout << "1. Warrior.\n2. Hunter.\n3. Mage\n~~~~~~~~~~~~~~~~\n\n";
 						char vvod3 = _getch();
 						switch (vvod3)
 						{
@@ -501,6 +703,87 @@ public:
 							cout << "\tVS\n";
 							cout << H2 << "\n~~~~~~~~~~~~~~~~\n\n";
 							Fight(H1, H2);
+							break;
+						}
+						case'3':
+						{
+							Mage M2;
+							M2.CreateCharacter();
+							system("cls");
+							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
+							PrintDataMageWeapon();
+							CreateCharacterWithEnemy(M2, MageWeapon);
+							system("cls");
+							cout << H1 << endl;
+							cout << "\tVS\n";
+							cout << M2 << "\n~~~~~~~~~~~~~~~~\n\n";
+							Fight(H1, M2);
+							break;
+						}
+						default:
+							break;
+						}
+						system("pause");
+						vvod2 = 27;
+						break;
+					}
+					case'3':
+					{
+						Mage M1;
+						M1.CreateCharacter();
+						system("cls");
+						cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
+						PrintDataMageWeapon();
+						CreateCharacterWithEnemy(M1, MageWeapon);
+						system("cls");
+						cout << "Who will fight against " << M1.getName() << endl;
+						cout << "1. Warrior.\n2. Hunter.\n3. Mage\n~~~~~~~~~~~~~~~~\n\n";
+						char vvod3 = _getch();
+						switch (vvod3)
+						{
+						case'1':
+						{
+							Warrior W2;
+							W2.CreateCharacter();
+							system("cls");
+							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
+							PrintDataWarriorWeapon();
+							CreateCharacterWithEnemy(W2, WarriorWeapon);
+							system("cls");
+							cout << M1 << endl;
+							cout << "\tVS\n";
+							cout << W2 << "\n~~~~~~~~~~~~~~~~\n\n";
+							Fight(M1, W2);
+							break;
+						}
+						case'2':
+						{
+							Hunter H2;
+							H2.CreateCharacter();
+							system("cls");
+							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
+							PrintDataHunterWeapon();
+							CreateCharacterWithEnemy(H2, HunterWeapon);
+							system("cls");
+							cout << M1 << endl;
+							cout << "\tVS\n";
+							cout << H2 << "\n~~~~~~~~~~~~~~~~\n\n";
+							Fight(M1, H2);
+							break;
+						}
+						case'3':
+						{
+							Mage M2;
+							M2.CreateCharacter();
+							system("cls");
+							cout << "Choose ur weapon.\n~~~~~~~~~~~~~~~~\n\n";
+							PrintDataMageWeapon();
+							CreateCharacterWithEnemy(M2, MageWeapon);
+							system("cls");
+							cout << M1 << endl;
+							cout << "\tVS\n";
+							cout << M2 << "\n~~~~~~~~~~~~~~~~\n\n";
+							Fight(M1, M2);
 							break;
 						}
 						default:
@@ -559,7 +842,7 @@ public:
 			}
 		} while (vvod != 27);
 	}
-	
+
 	~Game()
 	{
 		HunterWeapon.clear();
